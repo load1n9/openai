@@ -1,5 +1,10 @@
-import { OpenAI } from '../mod.ts';
+import { OpenAI } from "../mod.ts";
 
-const instance = new OpenAI('YOUR_API_KEY');
+const openAI = new OpenAI("YOUR_API_KEY");
 
-console.log(await instance.createCompletion('The meaning of life is'))
+const completion = await openAI.createCompletion({
+  model: "davinci",
+  prompt: "The meaning of life is",
+});
+
+console.log(completion);
