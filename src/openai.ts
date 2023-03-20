@@ -28,6 +28,7 @@ import type {
   Translation,
   TranslationOptions,
 } from "./types.ts";
+import { basename } from "https://deno.land/std@0.180.0/path/mod.ts";
 
 const baseUrl = "https://api.openai.com/v1";
 
@@ -38,15 +39,25 @@ export class OpenAI {
     this.#privateKey = privateKey;
   }
 
-  // deno-lint-ignore no-explicit-any
-  async #request(url: string, body: any, method = "POST") {
+  async #request(
+    url: string,
+    // deno-lint-ignore no-explicit-any
+    body: any,
+    options?: { method?: string; noContentType?: boolean },
+  ) {
     const response = await fetch(`${baseUrl}${url}`, {
-      body: body ? JSON.stringify(body) : undefined,
+      body: options?.noContentType
+        ? body
+        : (body ? JSON.stringify(body) : undefined),
       headers: {
         Authorization: `Bearer ${this.#privateKey}`,
-        "Content-Type": "application/json",
+        ...(
+          options?.noContentType ? {} : {
+            "Content-Type": "application/json",
+          }
+        ),
       },
-      method,
+      method: options?.method ?? "POST",
     });
 
     return await response.json();
@@ -58,7 +69,7 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/models/list
    */
   async listModels(): Promise<ModelList> {
-    return await this.#request("/models", undefined, "GET");
+    return await this.#request("/models", undefined, { method: "GET" });
   }
 
   /**
@@ -67,7 +78,9 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/models/retrieve
    */
   async getModel(model: string): Promise<Model> {
-    return await this.#request(`/models/${model}`, undefined, "GET");
+    return await this.#request(`/models/${model}`, undefined, {
+      method: "GET",
+    });
   }
 
   /**
@@ -201,13 +214,39 @@ export class OpenAI {
   async createTranscription(
     options: TranscriptionOptions,
   ): Promise<Transcription> {
-    return await this.#request(`/audio/transcriptions`, {
-      file: options.file,
-      model: options.model,
-      prompt: options.prompt,
-      response_format: options.responseFormat,
-      temperature: options.temperature,
-      language: options.language,
+    const formData = new FormData();
+
+    // Model specified
+    formData.append("model", options.model);
+
+    // File data
+    if (typeof options.file === "string") {
+      const file = await Deno.readFile(options.file);
+
+      formData.append(
+        "file",
+        new File([file], basename(options.file)),
+      );
+    } else {
+      // Deno types are wrong
+      formData.append("file", options.file as unknown as Blob);
+    }
+
+    if (options.prompt) {
+      formData.append("prompt", options.prompt);
+    }
+    if (options.responseFormat) {
+      formData.append("response_format", options.responseFormat);
+    }
+    if (options.temperature) {
+      formData.append("temperature", options.temperature.toString());
+    }
+    if (options.language) {
+      formData.append("language", options.language);
+    }
+
+    return await this.#request(`/audio/transcriptions`, formData, {
+      noContentType: true,
     });
   }
 
@@ -217,12 +256,36 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/audio/create
    */
   async createTranslation(options: TranslationOptions): Promise<Translation> {
-    return await this.#request(`/audio/translations`, {
-      file: options.file,
-      model: options.model,
-      prompt: options.prompt,
-      response_format: options.responseFormat,
-      temperature: options.temperature,
+    const formData = new FormData();
+
+    // Model specified
+    formData.append("model", options.model);
+
+    // File data
+    if (typeof options.file === "string") {
+      const file = await Deno.readFile(options.file);
+
+      formData.append(
+        "file",
+        new File([file], basename(options.file)),
+      );
+    } else {
+      // Deno types are wrong
+      formData.append("file", options.file as unknown as Blob);
+    }
+
+    if (options.prompt) {
+      formData.append("prompt", options.prompt);
+    }
+    if (options.responseFormat) {
+      formData.append("response_format", options.responseFormat);
+    }
+    if (options.temperature) {
+      formData.append("temperature", options.temperature.toString());
+    }
+
+    return await this.#request(`/audio/translations`, formData, {
+      noContentType: true,
     });
   }
 
@@ -232,7 +295,7 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/files/list
    */
   async listFiles(): Promise<FileList> {
-    return await this.#request(`/files`, undefined, "GET");
+    return await this.#request(`/files`, undefined, { method: "GET" });
   }
 
   /**
@@ -253,7 +316,9 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/files/delete
    */
   async deleteFile(fileId: string): Promise<DeletedFile> {
-    return await this.#request(`/files/${fileId}`, undefined, "DELETE");
+    return await this.#request(`/files/${fileId}`, undefined, {
+      method: "DELETE",
+    });
   }
 
   /**
@@ -262,7 +327,9 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/files/retrieve
    */
   async retrieveFile(fileId: string): Promise<File> {
-    return await this.#request(`/files/${fileId}`, undefined, "GET");
+    return await this.#request(`/files/${fileId}`, undefined, {
+      method: "GET",
+    });
   }
 
   /**
@@ -310,7 +377,7 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/fine-tunes/list
    */
   async listFineTunes(): Promise<FineTuneList> {
-    return await this.#request(`/fine-tunes`, undefined, "GET");
+    return await this.#request(`/fine-tunes`, undefined, { method: "GET" });
   }
 
   /**
@@ -321,7 +388,9 @@ export class OpenAI {
   async retrieveFineTune(
     fineTuneId: string,
   ): Promise<(FineTune & { events: FineTuneEvent[] })> {
-    return await this.#request(`/fine-tunes/${fineTuneId}`, undefined, "GET");
+    return await this.#request(`/fine-tunes/${fineTuneId}`, undefined, {
+      method: "GET",
+    });
   }
 
   /**
@@ -345,7 +414,7 @@ export class OpenAI {
     return await this.#request(
       `/fine-tunes/${fineTuneId}/events`,
       undefined,
-      "GET",
+      { method: "GET" },
     );
   }
 
@@ -355,7 +424,9 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/fine-tunes/delete-model
    */
   async deleteFineTuneModel(model: string): Promise<DeletedFineTune> {
-    return await this.#request(`/models/${model}`, undefined, "DELETE");
+    return await this.#request(`/models/${model}`, undefined, {
+      method: "DELETE",
+    });
   }
 
   /**

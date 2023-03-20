@@ -1,3 +1,5 @@
+export type FileSpecifier = string | File;
+
 export interface CompletionOptions {
   /**
    * ID of the model to use. You can use the List models API to see all of your available models, or see our Model overview for descriptions of them.
@@ -388,7 +390,7 @@ export interface TranscriptionOptions {
    * The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
    * https://platform.openai.com/docs/api-reference/audio/create#audio/create-file
    */
-  file: string;
+  file: FileSpecifier;
 
   /**
    * ID of the model to use. Only whisper-1 is currently available.
@@ -427,7 +429,7 @@ export interface TranslationOptions {
    * The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
    * https://platform.openai.com/docs/api-reference/audio/create#audio/create-file
    */
-  file: string;
+  file: FileSpecifier;
 
   /**
    * ID of the model to use. Only whisper-1 is currently available.
