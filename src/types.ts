@@ -669,7 +669,7 @@ export interface Translation {
   text: string;
 }
 
-export interface File {
+export interface FileInstance {
   id: string;
   object: "file";
   bytes: number;
@@ -679,7 +679,7 @@ export interface File {
 }
 
 export interface FileList {
-  data: File[];
+  data: FileInstance[];
   object: "list";
 }
 
@@ -714,10 +714,10 @@ export interface FineTune {
     prompt_loss_weight: number;
   };
   organization_id: string;
-  result_files: File[];
+  result_files: FileInstance[];
   status: "pending" | "succeeded" | "cancelled";
-  validation_files: File[];
-  training_files: File[];
+  validation_files: FileInstance[];
+  training_files: FileInstance[];
   updated_at: number;
 }
 
