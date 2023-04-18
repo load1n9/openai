@@ -9,8 +9,9 @@ import type {
   EditOptions,
   Embedding,
   EmbeddingsOptions,
-  File,
+  FileInstance,
   FileList,
+  FileSpecifier,
   FineTune,
   FineTuneEvent,
   FineTuneEventList,
@@ -303,10 +304,33 @@ export class OpenAI {
    *
    * https://platform.openai.com/docs/api-reference/files/upload
    */
-  async uploadFile(file: string, purpose: string): Promise<File> {
-    return await this.#request(`/files`, {
-      file,
-      purpose,
+  async uploadFile(
+    file: FileSpecifier,
+    purpose: string,
+  ): Promise<FileInstance> {
+    const formData = new FormData();
+
+    // Model specified
+    formData.append("file", file);
+
+    // File data
+    if (typeof file === "string") {
+      const fileData = await Deno.readFile(file);
+
+      formData.append(
+        "file",
+        new File([fileData], basename(file)),
+      );
+    } else {
+      // Deno types are wrong
+      formData.append("file", file as unknown as Blob);
+    }
+
+    formData.append("purpose", purpose);
+
+    return await this.#request(`/files`, formData, {
+      noContentType: true,
+      method: "POST",
     });
   }
 
@@ -326,7 +350,7 @@ export class OpenAI {
    *
    * https://platform.openai.com/docs/api-reference/files/retrieve
    */
-  async retrieveFile(fileId: string): Promise<File> {
+  async retrieveFile(fileId: string): Promise<FileInstance> {
     return await this.#request(`/files/${fileId}`, undefined, {
       method: "GET",
     });
