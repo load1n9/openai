@@ -124,7 +124,7 @@ export interface CompletionOptions {
 
 export interface ChatCompletionOptions {
   /**
-   * ID of the model to use. Currently, only gpt-3.5-turbo and gpt-3.5-turbo-0301 are supported.
+   * ID of the model to use. Currently gpt-4, gpt-4-0314, gpt-4-32k, gpt-4-32k-0314, gpt-3.5-turbo, gpt-3.5-turbo-0301 are supported.
    * https://platform.openai.com/docs/api-reference/chat/create#chat/create-model
    */
   model: string;
