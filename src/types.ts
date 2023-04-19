@@ -134,7 +134,7 @@ export interface ChatCompletionOptions {
    * https://platform.openai.com/docs/api-reference/chat/create#chat/create-messages
    */
   messages: {
-    name?: string; 
+    name?: string;
     role: "system" | "assistant" | "user";
     content: string;
   }[];

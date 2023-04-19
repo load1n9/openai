@@ -1,1 +1,3 @@
 .vscode
+.devcontainer
+.npmignore
