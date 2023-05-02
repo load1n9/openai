@@ -1,4 +1,4 @@
-# Deno wrapper for the Open Ai API
+# Unofficial Deno wrapper for the Open Ai API
 
 [![Tags](https://img.shields.io/github/release/load1n9/openai)](https://github.com/load1n9/openai/releases)
 [![Doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/openai/mod.ts)
@@ -7,12 +7,20 @@
 
 ## Usage
 
+Your Open AI Api key ([found here](https://beta.openai.com/account/api-keys)) is needed for this library to work. We recommend setting it as an environment variable. Here is a configuration example.
+
+```ts
+import { OpenAI } from "https://deno.land/x/openai/mod.ts";
+
+const openAI = new OpenAI(Deno.env.get("YOUR_API_KEY")!);
+```
+
 ### Completion
 
 ```ts
 import { OpenAI } from "https://deno.land/x/openai/mod.ts";
 
-const openAI = new OpenAI("YOUR_API_KEY");
+const openAI = new OpenAI(Deno.env.get("YOUR_API_KEY")!);
 
 const completion = await openAI.createCompletion({
   model: "davinci",
@@ -27,7 +35,7 @@ console.log(completion.choices);
 ```ts
 import { OpenAI } from "https://deno.land/x/openai/mod.ts";
 
-const openAI = new OpenAI("YOUR_API_KEY");
+const openAI = new OpenAI(Deno.env.get("YOUR_API_KEY")!);
 
 const chatCompletion = await openAI.createChatCompletion({
   model: "gpt-3.5-turbo",
@@ -50,7 +58,7 @@ console.log(chatCompletion);
 ```ts
 import { OpenAI } from "https://deno.land/x/openai/mod.ts";
 
-const openAI = new OpenAI("YOUR_API_KEY");
+const openAI = new OpenAI(Deno.env.get("YOUR_API_KEY")!);
 
 const image = await openAI.createImage({
   prompt: "A unicorn in space",
@@ -64,7 +72,7 @@ console.log(image);
 ```ts
 import { OpenAI } from "https://deno.land/x/openai/mod.ts";
 
-const openAI = new OpenAI("YOUR_API_KEY");
+const openAI = new OpenAI(Deno.env.get("YOUR_API_KEY")!);
 
 const edit = await openAI.createEdit({
   model: "text-davinci-edit-001",
@@ -80,7 +88,7 @@ console.log(edit);
 ```ts
 import { OpenAI } from "https://deno.land/x/openai/mod.ts";
 
-const openAI = new OpenAI("YOUR_API_KEY");
+const openAI = new OpenAI(Deno.env.get("YOUR_API_KEY")!);
 
 const imageEdit = await openAI.createImageEdit({
   image: "@otter.png",
@@ -98,7 +106,7 @@ console.log(imageEdit);
 ```ts
 import { OpenAI } from "https://deno.land/x/openai/mod.ts";
 
-const openAI = new OpenAI("YOUR_API_KEY");
+const openAI = new OpenAI(Deno.env.get("YOUR_API_KEY")!);
 
 const imageVariation = await openAI.createImageVariation({
   image: "@otter.png",

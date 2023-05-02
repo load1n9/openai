@@ -29,7 +29,7 @@ import type {
   Translation,
   TranslationOptions,
 } from "./types.ts";
-import { basename } from "https://deno.land/std@0.180.0/path/mod.ts";
+import { basename } from "https://deno.land/std@0.185.0/path/mod.ts";
 
 const baseUrl = "https://api.openai.com/v1";
 
