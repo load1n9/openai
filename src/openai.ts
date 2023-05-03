@@ -30,7 +30,8 @@ import type {
   TranslationOptions,
 } from "./types.ts";
 import { basename } from "https://deno.land/std@0.185.0/path/mod.ts";
-import { urlJoin } from 'https://deno.land/x/url_join/mod.ts';
+import { urlJoin } from "https://deno.land/x/url_join@1.0.0/mod.ts";
+
 const defaultBaseUrl = "https://api.openai.com/v1";
 
 export class OpenAI {
