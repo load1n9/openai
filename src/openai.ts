@@ -31,13 +31,15 @@ import type {
 } from "./types.ts";
 import { basename } from "https://deno.land/std@0.185.0/path/mod.ts";
 
-const baseUrl = "https://api.openai.com/v1";
+const defaultBaseUrl = "https://api.openai.com/v1";
 
 export class OpenAI {
   #privateKey: string;
+  #baseUrl: string;
 
-  constructor(privateKey: string) {
+  constructor(privateKey: string, options?: { baseUrl?: string }) {
     this.#privateKey = privateKey;
+    this.#baseUrl = options?.baseUrl ?? defaultBaseUrl;
   }
 
   async #request(
@@ -46,20 +48,23 @@ export class OpenAI {
     body: any,
     options?: { method?: string; noContentType?: boolean },
   ) {
-    const response = await fetch(`${baseUrl}${url}`, {
-      body: options?.noContentType
-        ? body
-        : (body ? JSON.stringify(body) : undefined),
-      headers: {
-        Authorization: `Bearer ${this.#privateKey}`,
-        ...(
-          options?.noContentType ? {} : {
-            "Content-Type": "application/json",
-          }
-        ),
+    const response = await fetch(
+      `${this.#baseUrl}${url}`,
+      {
+        body: options?.noContentType
+          ? body
+          : (body ? JSON.stringify(body) : undefined),
+        headers: {
+          Authorization: `Bearer ${this.#privateKey}`,
+          ...(
+            options?.noContentType ? {} : {
+              "Content-Type": "application/json",
+            }
+          ),
+        },
+        method: options?.method ?? "POST",
       },
-      method: options?.method ?? "POST",
-    });
+    );
 
     return await response.json();
   }
@@ -362,12 +367,15 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/files/retrieve-content
    */
   async retrieveFileContent(fileId: string) {
-    const response = await fetch(`${baseUrl}/files/${fileId}/content`, {
-      headers: {
-        Authorization: `Bearer ${this.#privateKey}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${this.#baseUrl}/files/${fileId}/content`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.#privateKey}`,
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
     return response.body;
   }
 
