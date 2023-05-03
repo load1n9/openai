@@ -29,17 +29,17 @@ import type {
   Translation,
   TranslationOptions,
 } from "./types.ts";
-import { basename, posix } from "https://deno.land/std@0.185.0/path/mod.ts";
+import { basename } from "https://deno.land/std@0.185.0/path/mod.ts";
 
 const defaultBaseUrl = "https://api.openai.com/v1";
 
 export class OpenAI {
   #privateKey: string;
-  #baseUrl: URL;
+  #baseUrl: string;
 
-  constructor(privateKey: string, baseUrl?: string) {
+  constructor(privateKey: string, options?: { baseUrl?: string }) {
     this.#privateKey = privateKey;
-    this.#baseUrl = new URL(baseUrl ?? defaultBaseUrl);
+    this.#baseUrl = options?.baseUrl ?? defaultBaseUrl;
   }
 
   async #request(
@@ -49,10 +49,7 @@ export class OpenAI {
     options?: { method?: string; noContentType?: boolean },
   ) {
     const response = await fetch(
-      new URL(
-        posix.join(this.#baseUrl.pathname, url),
-        this.#baseUrl.origin,
-      ).href,
+      `${this.#baseUrl}${url}`,
       {
         body: options?.noContentType
           ? body
@@ -371,10 +368,7 @@ export class OpenAI {
    */
   async retrieveFileContent(fileId: string) {
     const response = await fetch(
-      new URL(
-        posix.join(this.#baseUrl.pathname, `/files/${fileId}/content`),
-        this.#baseUrl.origin,
-      ).href,
+      `${this.#baseUrl}/files/${fileId}/content`,
       {
         headers: {
           Authorization: `Bearer ${this.#privateKey}`,
