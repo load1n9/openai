@@ -30,14 +30,16 @@ import type {
   TranslationOptions,
 } from "./types.ts";
 import { basename } from "https://deno.land/std@0.185.0/path/mod.ts";
-
-const baseUrl = "https://api.openai.com/v1";
+import { urlJoin } from 'https://deno.land/x/url_join/mod.ts';
+const defaultBaseUrl = "https://api.openai.com/v1";
 
 export class OpenAI {
   #privateKey: string;
+  #baseUrl: string;
 
-  constructor(privateKey: string) {
+  constructor(privateKey: string, baseUrl?: string) {
     this.#privateKey = privateKey;
+    this.#baseUrl = baseUrl ?? defaultBaseUrl;
   }
 
   async #request(
@@ -46,7 +48,7 @@ export class OpenAI {
     body: any,
     options?: { method?: string; noContentType?: boolean },
   ) {
-    const response = await fetch(`${baseUrl}${url}`, {
+    const response = await fetch(urlJoin(this.#baseUrl, url), {
       body: options?.noContentType
         ? body
         : (body ? JSON.stringify(body) : undefined),
@@ -362,7 +364,7 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/files/retrieve-content
    */
   async retrieveFileContent(fileId: string) {
-    const response = await fetch(`${baseUrl}/files/${fileId}/content`, {
+    const response = await fetch(urlJoin(this.#baseUrl, 'files', fileId, 'content'), {
       headers: {
         Authorization: `Bearer ${this.#privateKey}`,
         "Content-Type": "application/json",
