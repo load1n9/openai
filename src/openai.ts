@@ -29,18 +29,17 @@ import type {
   Translation,
   TranslationOptions,
 } from "./types.ts";
-import { basename } from "https://deno.land/std@0.185.0/path/mod.ts";
-import { urlJoin } from "https://deno.land/x/url_join@1.0.0/mod.ts";
+import { basename, posix } from "https://deno.land/std@0.185.0/path/mod.ts";
 
 const defaultBaseUrl = "https://api.openai.com/v1";
 
 export class OpenAI {
   #privateKey: string;
-  #baseUrl: string;
+  #baseUrl: URL;
 
   constructor(privateKey: string, baseUrl?: string) {
     this.#privateKey = privateKey;
-    this.#baseUrl = baseUrl ?? defaultBaseUrl;
+    this.#baseUrl = new URL(baseUrl ?? defaultBaseUrl);
   }
 
   async #request(
@@ -49,20 +48,26 @@ export class OpenAI {
     body: any,
     options?: { method?: string; noContentType?: boolean },
   ) {
-    const response = await fetch(urlJoin(this.#baseUrl, url), {
-      body: options?.noContentType
-        ? body
-        : (body ? JSON.stringify(body) : undefined),
-      headers: {
-        Authorization: `Bearer ${this.#privateKey}`,
-        ...(
-          options?.noContentType ? {} : {
-            "Content-Type": "application/json",
-          }
-        ),
+    const response = await fetch(
+      new URL(
+        posix.join(this.#baseUrl.pathname, url),
+        this.#baseUrl.origin,
+      ).href,
+      {
+        body: options?.noContentType
+          ? body
+          : (body ? JSON.stringify(body) : undefined),
+        headers: {
+          Authorization: `Bearer ${this.#privateKey}`,
+          ...(
+            options?.noContentType ? {} : {
+              "Content-Type": "application/json",
+            }
+          ),
+        },
+        method: options?.method ?? "POST",
       },
-      method: options?.method ?? "POST",
-    });
+    );
 
     return await response.json();
   }
@@ -365,12 +370,18 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/files/retrieve-content
    */
   async retrieveFileContent(fileId: string) {
-    const response = await fetch(urlJoin(this.#baseUrl, 'files', fileId, 'content'), {
-      headers: {
-        Authorization: `Bearer ${this.#privateKey}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      new URL(
+        posix.join(this.#baseUrl.pathname, `/files/${fileId}/content`),
+        this.#baseUrl.origin,
+      ).href,
+      {
+        headers: {
+          Authorization: `Bearer ${this.#privateKey}`,
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
     return response.body;
   }
 
