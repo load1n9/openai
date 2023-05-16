@@ -29,7 +29,7 @@ import type {
   Translation,
   TranslationOptions,
 } from "./types.ts";
-import { basename } from "https://deno.land/std@0.185.0/path/mod.ts";
+import { basename } from "https://deno.land/std@0.187.0/path/mod.ts";
 
 const defaultBaseUrl = "https://api.openai.com/v1";
 
@@ -65,8 +65,21 @@ export class OpenAI {
         method: options?.method ?? "POST",
       },
     );
+    const data = await response.json();
 
-    return await response.json();
+    if (data.error) {
+      let errorMessage = `${data.error.type}`;
+      if (data.error.message) {
+        errorMessage += ": " + data.error.message;
+      }
+      if (data.error.code) {
+        errorMessage += ` (${data.error.code})`;
+      }
+      console.log(data.error);
+      throw new Error(errorMessage);
+    }
+
+    return data;
   }
 
   /**
