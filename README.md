@@ -1,4 +1,4 @@
-# Unofficial Deno wrapper for the Open Ai API
+# Unofficial Deno wrapper for the Open AI API
 
 [![Tags](https://img.shields.io/github/release/load1n9/openai)](https://github.com/load1n9/openai/releases)
 [![Doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https/deno.land/x/openai/mod.ts)
@@ -7,7 +7,9 @@
 
 ## Usage
 
-Your Open AI Api key ([found here](https://beta.openai.com/account/api-keys)) is needed for this library to work. We recommend setting it as an environment variable. Here is a configuration example.
+Your Open AI Api key ([found here](https://beta.openai.com/account/api-keys)) is
+needed for this library to work. We recommend setting it as an environment
+variable. Here is a configuration example.
 
 ```ts
 import { OpenAI } from "https://deno.land/x/openai/mod.ts";
