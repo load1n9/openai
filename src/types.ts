@@ -53,13 +53,6 @@ export interface CompletionOptions {
   n?: number;
 
   /**
-   * Whether to stream back partial progress.
-   * If set, tokens will be sent as data-only server-sent events as they become available, with the stream terminated by a data: [DONE] message.
-   * https://platform.openai.com/docs/api-reference/completions/create#completions/create-stream
-   */
-  stream?: boolean;
-
-  /**
    * Include the log probabilities on the logprobs most likely tokens, as well the chosen tokens.
    * For example, if logprobs is 5, the API will return a list of the 5 most likely tokens.
    * The API will always return the logprob of the sampled token, so there may be up to logprobs+1 elements in the response.
@@ -160,13 +153,6 @@ export interface ChatCompletionOptions {
    * https://platform.openai.com/docs/api-reference/chat/create#chat/create-n
    */
   n?: number;
-
-  /**
-   * If set, partial message deltas will be sent, like in ChatGPT.
-   * Tokens will be sent as data-only server-sent events as they become available, with the stream terminated by a data: [DONE] message.
-   * https://platform.openai.com/docs/api-reference/chat/create#chat/create-stream
-   */
-  stream?: boolean;
 
   /**
    * Up to 4 sequences where the API will stop generating further tokens.
@@ -607,6 +593,19 @@ export interface Completion {
   };
 }
 
+export interface CompletionStream {
+  id: string;
+  object: "text_completion";
+  created: number;
+  model: string;
+  choices: {
+    text: string;
+    index: number;
+    logprobs: number | null;
+    finish_reason: string;
+  }[];
+}
+
 export interface ChatCompletion {
   id: string;
   object: "chat.completion";
@@ -625,6 +624,21 @@ export interface ChatCompletion {
     completion_tokens: number;
     total_tokens: number;
   };
+}
+
+export interface ChatCompletionStream {
+  id: string;
+  object: "chat.completion.chunk";
+  created: number;
+  choices: {
+    index: number;
+    delta: {
+      name?: string;
+      role?: "system" | "assistant" | "user";
+      content?: string;
+    };
+    finish_reason: string;
+  }[];
 }
 
 export interface Edit {

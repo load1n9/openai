@@ -1,8 +1,12 @@
+import { basename } from "https://deno.land/std@0.189.0/path/mod.ts";
+import { decodeStream, throwError } from "./util.ts";
 import type {
   ChatCompletion,
   ChatCompletionOptions,
+  ChatCompletionStream,
   Completion,
   CompletionOptions,
+  CompletionStream,
   DeletedFile,
   DeletedFineTune,
   Edit,
@@ -29,7 +33,6 @@ import type {
   Translation,
   TranslationOptions,
 } from "./types.ts";
-import { basename } from "https://deno.land/std@0.187.0/path/mod.ts";
 
 const defaultBaseUrl = "https://api.openai.com/v1";
 
@@ -67,17 +70,7 @@ export class OpenAI {
     );
     const data = await response.json();
 
-    if (data.error) {
-      let errorMessage = `${data.error.type}`;
-      if (data.error.message) {
-        errorMessage += ": " + data.error.message;
-      }
-      if (data.error.code) {
-        errorMessage += ` (${data.error.code})`;
-      }
-      console.log(data.error);
-      throw new Error(errorMessage);
-    }
+    throwError(data);
 
     return data;
   }
@@ -108,7 +101,6 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/completions/create
    */
   async createCompletion(options: CompletionOptions): Promise<Completion> {
-    // TODO: make options.stream work
     return await this.#request(`/completions`, {
       model: options.model,
       prompt: options.prompt,
@@ -117,7 +109,6 @@ export class OpenAI {
       temperature: options.temperature,
       top_p: options.topP,
       n: options.n,
-      stream: options.stream,
       logprobs: options.logprobs,
       echo: options.echo,
       stop: options.stop,
@@ -127,6 +118,46 @@ export class OpenAI {
       logit_bias: options.logitBias,
       user: options.user,
     });
+  }
+
+  /**
+   * Creates a completion stream for the provided prompt and parameters
+   *
+   * https://platform.openai.com/docs/api-reference/completions/create
+   */
+  async createCompletionStream(
+    options: Omit<CompletionOptions, "bestOf">,
+    callback: (chunk: CompletionStream) => void,
+  ): Promise<void> {
+    const res = await fetch(
+      `${this.#baseUrl}/completions`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.#privateKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: options.model,
+          prompt: options.prompt,
+          suffix: options.suffix,
+          max_tokens: options.maxTokens,
+          temperature: options.temperature,
+          top_p: options.topP,
+          n: options.n,
+          stream: true,
+          logprobs: options.logprobs,
+          echo: options.echo,
+          stop: options.stop,
+          presence_penalty: options.presencePenalty,
+          frequency_penalty: options.frequencyPenalty,
+          logit_bias: options.logitBias,
+          user: options.user,
+        }),
+      },
+    );
+
+    await decodeStream(res, callback);
   }
 
   /**
@@ -143,7 +174,6 @@ export class OpenAI {
       temperature: options.temperature,
       top_p: options.topP,
       n: options.n,
-      stream: options.stream,
       stop: options.stop,
       max_tokens: options.maxTokens,
       presence_penalty: options.presencePenalty,
@@ -151,6 +181,43 @@ export class OpenAI {
       logit_bias: options.logitBias,
       user: options.user,
     });
+  }
+
+  /**
+   * Creates a completion stream for the chat message
+   *
+   * https://platform.openai.com/docs/api-reference/chat/create
+   */
+  async createChatCompletionStream(
+    options: ChatCompletionOptions,
+    callback: (chunk: ChatCompletionStream) => void,
+  ): Promise<void> {
+    const res = await fetch(
+      `${this.#baseUrl}/chat/completions`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.#privateKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: options.model,
+          messages: options.messages,
+          temperature: options.temperature,
+          top_p: options.topP,
+          n: options.n,
+          stream: true,
+          stop: options.stop,
+          max_tokens: options.maxTokens,
+          presence_penalty: options.presencePenalty,
+          frequency_penalty: options.frequencyPenalty,
+          logit_bias: options.logitBias,
+          user: options.user,
+        }),
+      },
+    );
+
+    await decodeStream(res, callback);
   }
 
   /**
