@@ -127,7 +127,7 @@ export class OpenAI {
    */
   async createCompletionStream(
     options: Omit<CompletionOptions, "bestOf">,
-    callback: (chunk: CompletionStream) => void,
+    callback: (chunk: CompletionStream) => boolean,
   ): Promise<void> {
     const res = await fetch(
       `${this.#baseUrl}/completions`,
@@ -190,7 +190,7 @@ export class OpenAI {
    */
   async createChatCompletionStream(
     options: ChatCompletionOptions,
-    callback: (chunk: ChatCompletionStream) => void,
+    callback: (chunk: ChatCompletionStream) => boolean,
   ): Promise<void> {
     const res = await fetch(
       `${this.#baseUrl}/chat/completions`,

@@ -1,8 +1,6 @@
-import { TextDelimiterStream } from "https://deno.land/std@0.189.0/streams/mod.ts";
-
-export function throwError(
-  data: { error?: { type: string; message: string; code: string } },
-) {
+export function throwError(data: {
+  error?: { type: string; message: string; code: string };
+}) {
   if (data.error) {
     let errorMessage = `${data.error.type}`;
     if (data.error.message) {
@@ -16,25 +14,56 @@ export function throwError(
   }
 }
 
-// deno-lint-ignore no-explicit-any
-export async function decodeStream(
+export async function decodeStream<T>(
   res: Response,
-  callback: (data: any) => void,
+  callback: (data: T) => boolean
 ) {
-  const chunks = res.body!
-    .pipeThrough(new TextDecoderStream())
-    .pipeThrough(new TextDelimiterStream("\n\n"));
+  const stream = res.body!;
+  const decoder = new TextDecoder();
 
-  for await (const chunk of chunks) {
-    let data;
-    try {
-      data = JSON.parse(chunk);
-    } catch {
-      // no-op (just checking if error message)
+  if (stream.locked) {
+    throw new Error("The stream is locked.");
+  }
+
+  const reader = stream.getReader();
+  let read = true;
+  let stopReason = "Callback stop.";
+
+  while (read) {
+    const { done, value: buff } = await reader.read();
+
+    if (done) {
+      break;
     }
-    if (data) throwError(data);
 
-    if (chunk === "data: [DONE]") break;
-    callback(JSON.parse(chunk.slice(6)));
+    try {
+      const stringBuff = decoder.decode(buff);
+      const chunks = stringBuff.split("\n\n");
+
+      for (const chunk of chunks) {
+        const truncatedChunk = chunk.slice(6).trim();
+        if (truncatedChunk.length === 0 || truncatedChunk === "[DONE]") {
+          continue;
+        }
+
+        const argument: T = JSON.parse(truncatedChunk);
+
+        read &&= callback(argument);
+
+        if (!read) {
+          break;
+        }
+      }
+    } catch (error) {
+      stopReason = "Chunk parse error.";
+      console.error(stopReason, error);
+      read = false;
+    }
+  }
+
+  reader.releaseLock();
+
+  if (!read) {
+    await stream.cancel(stopReason);
   }
 }
