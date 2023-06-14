@@ -197,7 +197,42 @@ export interface ChatCompletionOptions {
    * https://platform.openai.com/docs/api-reference/chat/create#chat/create-user
    */
   user?: string;
+
+  /**
+   * A list of functions the model may generate JSON inputs for.
+   * https://platform.openai.com/docs/api-reference/chat/create#chat/create-functions
+   */
+    functions?: GPTFunction[];
 }
+
+type GPTFunction = {
+  name: string;
+  description: string;
+  parameters: ObjectSchema;
+};
+
+type JSONSchema = ObjectSchema | StringSchema | NumberSchema | BooleanSchema;
+
+type ObjectSchema = {
+  type: "object";
+  properties: Record<string, JSONSchema>;
+  required: string[];
+};
+
+type StringSchema = {
+  type: "string";
+  enum?: string[];
+};
+
+type NumberSchema = {
+  type: "number";
+  minimum?: number;
+  maximum?: number;
+};
+
+type BooleanSchema = {
+  type: "boolean";
+};
 
 export interface EditOptions {
   /**
