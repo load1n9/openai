@@ -221,7 +221,7 @@ type GPTFunction = {
   parameters: ObjectSchema;
 };
 
-type JSONSchema = ObjectSchema | StringSchema | NumberSchema | BooleanSchema;
+type JSONSchema = (ObjectSchema | StringSchema | NumberSchema | BooleanSchema) & {description?: string;};
 
 type ObjectSchema = {
   type: "object";
