@@ -212,7 +212,7 @@ export interface ChatCompletionOptions {
    *  "none" is the default when no functions are present. "auto" is the default if functions are present.
    * https://platform.openai.com/docs/api-reference/chat/create#chat/create-function_call
    */
-  function_call?: 'none' | 'auto' | string;
+  function_call?: 'none' | 'auto' | { name: string };
 }
 
 type GPTFunction = {

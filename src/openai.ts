@@ -180,7 +180,8 @@ export class OpenAI {
       frequency_penalty: options.frequencyPenalty,
       logit_bias: options.logitBias,
       user: options.user,
-      functions: options.functions
+      functions: options.functions,
+      function_call: options.function_call
     });
   }
 
@@ -214,7 +215,8 @@ export class OpenAI {
           frequency_penalty: options.frequencyPenalty,
           logit_bias: options.logitBias,
           user: options.user,
-          functions: options.functions
+          functions: options.functions,
+          function_call: options.function_call
         }),
       },
     );
