@@ -1,5 +1,5 @@
 import { basename } from "https://deno.land/std@0.189.0/path/mod.ts";
-import { decodeStream, throwError } from "./util.ts";
+import { decodeStream, throwErrorIfNeeded } from "./util.ts";
 import type {
   ChatCompletion,
   ChatCompletionOptions,
@@ -70,7 +70,7 @@ export class OpenAI {
     );
     const data = await response.json();
 
-    throwError(data);
+    throwErrorIfNeeded(data);
 
     return data;
   }
@@ -127,7 +127,7 @@ export class OpenAI {
    */
   async createCompletionStream(
     options: Omit<CompletionOptions, "bestOf">,
-    callback: (chunk: CompletionStream) => boolean,
+    callback: (chunk: CompletionStream) => void,
   ): Promise<void> {
     const res = await fetch(
       `${this.#baseUrl}/completions`,
@@ -190,7 +190,7 @@ export class OpenAI {
    */
   async createChatCompletionStream(
     options: ChatCompletionOptions,
-    callback: (chunk: ChatCompletionStream) => boolean,
+    callback: (chunk: ChatCompletionStream) => void,
   ): Promise<void> {
     const res = await fetch(
       `${this.#baseUrl}/chat/completions`,

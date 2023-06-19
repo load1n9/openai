@@ -1,69 +1,46 @@
-export function throwError(data: {
-  error?: { type: string; message: string; code: string };
-}) {
-  if (data.error) {
-    let errorMessage = `${data.error.type}`;
-    if (data.error.message) {
-      errorMessage += ": " + data.error.message;
-    }
-    if (data.error.code) {
-      errorMessage += ` (${data.error.code})`;
-    }
-    // console.log(data.error);
-    throw new Error(errorMessage);
+import { TextDelimiterStream } from "https://deno.land/std@0.189.0/streams/text_delimiter_stream.ts";
+import { ModelError, RequiredError } from "./types.ts";
+
+export function throwErrorIfNeeded(response: unknown) {
+  // deno-lint-ignore ban-types
+  if ("error" in (response as object)) {
+    const {
+      error: { type, message },
+    } = response as { error: ModelError };
+
+    throw new RequiredError(type, message);
   }
 }
 
 export async function decodeStream<T>(
-  res: Response,
-  callback: (data: T) => boolean
+  { body: stream }: Response,
+  callback: (data: T) => void
 ) {
-  const stream = res.body!;
-  const decoder = new TextDecoder();
-
-  if (stream.locked) {
-    throw new Error("The stream is locked.");
+  if (stream === null || stream.locked) {
+    throw new Error(`The stream is ${stream === null ? "null" : "locked"}.`);
   }
 
-  const reader = stream.getReader();
-  let read = true;
-  let stopReason = "Callback stop.";
+  const chunks = stream
+    .pipeThrough(new TextDecoderStream())
+    .pipeThrough(new TextDelimiterStream("\n\n"))
+    .getReader();
 
-  while (read) {
-    const { done, value: buff } = await reader.read();
+  try {
+    for (;;) {
+      const { done, value: chunk } = await chunks.read();
 
-    if (done) {
-      break;
-    }
-
-    try {
-      const stringBuff = decoder.decode(buff);
-      const chunks = stringBuff.split("\n\n");
-
-      for (const chunk of chunks) {
-        const truncatedChunk = chunk.slice(6).trim();
-        if (truncatedChunk.length === 0 || truncatedChunk === "[DONE]") {
-          continue;
-        }
-
-        const argument: T = JSON.parse(truncatedChunk);
-
-        read &&= callback(argument);
-
-        if (!read) {
-          break;
-        }
+      if (done || chunk === "data: [DONE]") {
+        break;
       }
-    } catch (error) {
-      stopReason = "Chunk parse error.";
-      console.error(stopReason, error);
-      read = false;
+
+      const argument = JSON.parse(
+        chunk.startsWith("data: ") ? chunk.slice(6) : chunk
+      );
+
+      throwErrorIfNeeded(argument);
+      callback(argument);
     }
-  }
-
-  reader.releaseLock();
-
-  if (!read) {
-    await stream.cancel(stopReason);
+  } finally {
+    chunks.releaseLock();
   }
 }

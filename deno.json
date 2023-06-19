@@ -1,4 +1,6 @@
 {
-  "tasks": {},
+  "tasks": {
+    "test": "YOUR_API_KEY=YOUR_API_KEY_HERE deno test --allow-env --allow-net"
+  },
   "lock": false
 }
