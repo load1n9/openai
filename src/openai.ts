@@ -168,7 +168,7 @@ export class OpenAI {
   async createChatCompletion(
     options: ChatCompletionOptions,
   ): Promise<ChatCompletion> {
-    return await this.#request(`/chat/completions`, {
+    const resp = await this.#request(`/chat/completions`, {
       model: options.model,
       messages: options.messages,
       temperature: options.temperature,
@@ -181,8 +181,14 @@ export class OpenAI {
       logit_bias: options.logitBias,
       user: options.user,
       functions: options.functions,
-      function_call: options.function_call
-    });
+      function_call: options.function_call,
+    }) as ChatCompletion;
+
+    // null coalesce content to empty string as discussed in PR #17
+    resp?.choices?.forEach(
+      (choice) => (choice.message.content = choice.message.content ?? "")
+    );
+    return resp;
   }
 
   /**

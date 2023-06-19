@@ -202,7 +202,7 @@ export interface ChatCompletionOptions {
    * A list of functions the model may generate JSON inputs for.
    * https://platform.openai.com/docs/api-reference/chat/create#chat/create-functions
    */
-  functions?: GPTFunction[];
+  functions?: ChatCompletionOptionsFunction[];
 
   /**
    * Controls how the model responds to function calls. 
@@ -215,18 +215,29 @@ export interface ChatCompletionOptions {
   function_call?: 'none' | 'auto' | { name: string };
 }
 
-type GPTFunction = {
+export type ChatCompletionOptionsFunction = {
   name: string;
   description: string;
   parameters: ObjectSchema;
 };
 
-type JSONSchema = (ObjectSchema | StringSchema | NumberSchema | BooleanSchema) & {description?: string;};
+type JSONSchema = (
+  | ObjectSchema
+  | StringSchema
+  | NumberSchema
+  | BooleanSchema
+  | ArraySchema
+) & { description?: string };
 
 type ObjectSchema = {
   type: "object";
   properties: Record<string, JSONSchema>;
   required: string[];
+};
+
+type ArraySchema = {
+  type: "array";
+  items: JSONSchema;
 };
 
 type StringSchema = {
@@ -660,7 +671,7 @@ export interface ChatCompletion {
     message: {
       name?: string;
       role: "system" | "assistant" | "user";
-      content: string | null;
+      content: string;
       function_call?: {
         "name": string,
         "arguments": string
