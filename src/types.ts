@@ -197,7 +197,63 @@ export interface ChatCompletionOptions {
    * https://platform.openai.com/docs/api-reference/chat/create#chat/create-user
    */
   user?: string;
+
+  /**
+   * A list of functions the model may generate JSON inputs for.
+   * https://platform.openai.com/docs/api-reference/chat/create#chat/create-functions
+   */
+  functions?: ChatCompletionOptionsFunction[];
+
+  /**
+   * Controls how the model responds to function calls. 
+   * "none" means the model does not call a function, and responds to the end-user. 
+   * "auto" means the model can pick between an end-user or calling a function. 
+   *  Specifying a particular function via {"name":\ "my_function"} forces the model to call that function. 
+   *  "none" is the default when no functions are present. "auto" is the default if functions are present.
+   * https://platform.openai.com/docs/api-reference/chat/create#chat/create-function_call
+   */
+  function_call?: 'none' | 'auto' | { name: string };
 }
+
+export type ChatCompletionOptionsFunction = {
+  name: string;
+  description: string;
+  parameters: ObjectSchema;
+};
+
+type JSONSchema = (
+  | ObjectSchema
+  | StringSchema
+  | NumberSchema
+  | BooleanSchema
+  | ArraySchema
+) & { description?: string };
+
+type ObjectSchema = {
+  type: "object";
+  properties: Record<string, JSONSchema>;
+  required: string[];
+};
+
+type ArraySchema = {
+  type: "array";
+  items: JSONSchema;
+};
+
+type StringSchema = {
+  type: "string";
+  enum?: string[];
+};
+
+type NumberSchema = {
+  type: "number";
+  minimum?: number;
+  maximum?: number;
+};
+
+type BooleanSchema = {
+  type: "boolean";
+};
 
 export interface EditOptions {
   /**
@@ -616,6 +672,10 @@ export interface ChatCompletion {
       name?: string;
       role: "system" | "assistant" | "user";
       content: string;
+      function_call?: {
+        "name": string,
+        "arguments": string
+      }
     };
     finish_reason: string;
   }[];
