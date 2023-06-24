@@ -126,11 +126,7 @@ export interface ChatCompletionOptions {
    * The messages to generate chat completions for, in the chat format.The messages to generate chat completions for, in the chat format.
    * https://platform.openai.com/docs/api-reference/chat/create#chat/create-messages
    */
-  messages: {
-    name?: string;
-    role: "system" | "assistant" | "user";
-    content: string;
-  }[];
+  messages: ChatCompletionMessage[];
 
   /**
    * What sampling temperature to use, between 0 and 2.
@@ -205,14 +201,14 @@ export interface ChatCompletionOptions {
   functions?: ChatCompletionOptionsFunction[];
 
   /**
-   * Controls how the model responds to function calls. 
-   * "none" means the model does not call a function, and responds to the end-user. 
-   * "auto" means the model can pick between an end-user or calling a function. 
-   *  Specifying a particular function via {"name":\ "my_function"} forces the model to call that function. 
+   * Controls how the model responds to function calls.
+   * "none" means the model does not call a function, and responds to the end-user.
+   * "auto" means the model can pick between an end-user or calling a function.
+   *  Specifying a particular function via {"name":\ "my_function"} forces the model to call that function.
    *  "none" is the default when no functions are present. "auto" is the default if functions are present.
    * https://platform.openai.com/docs/api-reference/chat/create#chat/create-function_call
    */
-  function_call?: 'none' | 'auto' | { name: string };
+  function_call?: "none" | "auto" | { name: string };
 }
 
 export type ChatCompletionOptionsFunction = {
@@ -221,13 +217,55 @@ export type ChatCompletionOptionsFunction = {
   parameters: ObjectSchema;
 };
 
-type JSONSchema = (
-  | ObjectSchema
-  | StringSchema
-  | NumberSchema
-  | BooleanSchema
-  | ArraySchema
-) & { description?: string };
+interface SystemCompletionMessage {
+  content: string;
+  name?: string;
+  role: "system";
+}
+
+interface UserCompletionMessage {
+  content: string;
+  name?: string;
+  role: "user";
+}
+
+interface AssistantCompletionMessage {
+  content: string;
+  name?: string;
+  role: "assistant";
+}
+
+interface FunctionAwareAssistantCompletionMessage {
+  content: string | null;
+  role: "assistant";
+  function_call?: {
+    "name": string;
+    "arguments": string;
+  };
+}
+
+interface FunctionCompletionMessage {
+  content: string;
+  role: "function";
+  name: string;
+}
+
+export type ChatCompletionMessage =
+  | SystemCompletionMessage
+  | UserCompletionMessage
+  | FunctionAwareAssistantCompletionMessage
+  | FunctionCompletionMessage
+  | AssistantCompletionMessage;
+
+type JSONSchema =
+  & (
+    | ObjectSchema
+    | StringSchema
+    | NumberSchema
+    | BooleanSchema
+    | ArraySchema
+  )
+  & { description?: string };
 
 type ObjectSchema = {
   type: "object";
@@ -668,15 +706,7 @@ export interface ChatCompletion {
   created: number;
   choices: {
     index: number;
-    message: {
-      name?: string;
-      role: "system" | "assistant" | "user";
-      content: string;
-      function_call?: {
-        "name": string,
-        "arguments": string
-      }
-    };
+    message: ChatCompletionMessage;
     finish_reason: string;
   }[];
   usage: {
