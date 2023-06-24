@@ -217,15 +217,42 @@ export type ChatCompletionOptionsFunction = {
   parameters: ObjectSchema;
 };
 
-export interface ChatCompletionMessage {
-  name?: string;
-  role: "system" | "assistant" | "user" | "function";
+interface SystemCompletionMessage {
+  content: string;
+  role: "system";
+}
+
+interface UserCompletionMessage {
+  content: string;
+  role: "user";
+}
+
+interface AssistantCompletionMessage {
+  content: string;
+  role: "assistant";
+}
+
+interface FunctionAwareAssistantCompletionMessage {
   content: string | null;
+  role: "assistant";
   function_call?: {
     "name": string;
     "arguments": string;
   };
 }
+
+interface FunctionCompletionMessage {
+  content: string;
+  role: "function";
+  name: string;
+}
+
+export type ChatCompletionMessage =
+  | SystemCompletionMessage
+  | UserCompletionMessage
+  | FunctionAwareAssistantCompletionMessage
+  | FunctionCompletionMessage
+  | AssistantCompletionMessage;
 
 type JSONSchema =
   & (
