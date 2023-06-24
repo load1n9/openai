@@ -219,16 +219,19 @@ export type ChatCompletionOptionsFunction = {
 
 interface SystemCompletionMessage {
   content: string;
+  name?: string;
   role: "system";
 }
 
 interface UserCompletionMessage {
   content: string;
+  name?: string;
   role: "user";
 }
 
 interface AssistantCompletionMessage {
   content: string;
+  name?: string;
   role: "assistant";
 }
 
