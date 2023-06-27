@@ -291,7 +291,7 @@ export class OpenAI {
     if (options.size) { formData.append("size", options.size); }
     if (options.user) { formData.append("user", options.user); }
     if (options.responseFormat) {
-      formData.append("responseFormat", options.responseFormat);
+      formData.append("response_format", options.responseFormat);
     }
 
     return await this.#request(`/images/edits`, formData, {
@@ -328,7 +328,7 @@ export class OpenAI {
     if (options.size) { formData.append("size", options.size); }
     if (options.user) { formData.append("user", options.user); }
     if (options.responseFormat) {
-      formData.append("responseFormat", options.responseFormat);
+      formData.append("response_format", options.responseFormat);
     }
 
     return await this.#request(`/images/variations`, formData, {
