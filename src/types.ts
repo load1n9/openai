@@ -372,7 +372,7 @@ export interface ImageEditOptions {
    * If mask is not provided, image must have transparency, which will be used as the mask.
    * https://platform.openai.com/docs/api-reference/images/create-edit#images/create-edit-image
    */
-  image: string;
+  image: FileSpecifier;
 
   /**
    * An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where image should be edited.
@@ -417,7 +417,7 @@ export interface ImageVariationOptions {
    * The image to edit. Must be a valid PNG file, less than 4MB, and square.
    * https://platform.openai.com/docs/api-reference/images/create-variation#images/create-variation-image
    */
-  image: string;
+  image: FileSpecifier;
 
   /**
    * The number of images to generate. Must be between 1 and 10.

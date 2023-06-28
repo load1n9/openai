@@ -267,14 +267,36 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/images/create-edit
    */
   async createImageEdit(options: ImageEditOptions): Promise<Image> {
-    return await this.#request(`/images/edits`, {
-      image: options.image,
-      mask: options.mask,
-      prompt: options.prompt,
-      n: options.n,
-      size: options.size,
-      response_format: options.responseFormat,
-      user: options.user,
+    const formData = new FormData();
+
+    // Model specified
+    formData.append("image", options.image);
+
+    // File data
+    if (typeof options.image === "string") {
+      const fileData = await Deno.readFile(options.image);
+
+      formData.append(
+        "image",
+        new File([fileData], basename(options.image)),
+      );
+    } else {
+      // Deno types are wrong
+      formData.append("image", options.image as unknown as Blob);
+    }
+
+    if (options.n) { formData.append("n", options.n); }
+    if (options.mask) { formData.append("mask", options.mask); }
+    if (options.prompt) { formData.append("prompt", options.prompt); }
+    if (options.size) { formData.append("size", options.size); }
+    if (options.user) { formData.append("user", options.user); }
+    if (options.responseFormat) {
+      formData.append("response_format", options.responseFormat);
+    }
+
+    return await this.#request(`/images/edits`, formData, {
+      noContentType: true,
+      method: "POST",
     });
   }
 
@@ -284,12 +306,34 @@ export class OpenAI {
    * https://platform.openai.com/docs/api-reference/images/create-variation
    */
   async createImageVariation(options: ImageVariationOptions): Promise<Image> {
-    return await this.#request(`/images/variations`, {
-      image: options.image,
-      n: options.n,
-      size: options.size,
-      response_format: options.responseFormat,
-      user: options.user,
+    const formData = new FormData();
+
+    // Model specified
+    formData.append("image", options.image);
+
+    // File data
+    if (typeof options.image === "string") {
+      const fileData = await Deno.readFile(options.image);
+
+      formData.append(
+        "image",
+        new File([fileData], basename(options.image)),
+      );
+    } else {
+      // Deno types are wrong
+      formData.append("image", options.image as unknown as Blob);
+    }
+
+    if (options.n) { formData.append("n", options.n); }
+    if (options.size) { formData.append("size", options.size); }
+    if (options.user) { formData.append("user", options.user); }
+    if (options.responseFormat) {
+      formData.append("response_format", options.responseFormat);
+    }
+
+    return await this.#request(`/images/variations`, formData, {
+      noContentType: true,
+      method: "POST",
     });
   }
 
