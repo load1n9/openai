@@ -217,25 +217,25 @@ export type ChatCompletionOptionsFunction = {
   parameters: ObjectSchema;
 };
 
-interface SystemCompletionMessage {
+export interface SystemCompletionMessage {
   content: string;
   name?: string;
   role: "system";
 }
 
-interface UserCompletionMessage {
+export interface UserCompletionMessage {
   content: string;
   name?: string;
   role: "user";
 }
 
-interface AssistantCompletionMessage {
+export interface AssistantCompletionMessage {
   content: string;
   name?: string;
   role: "assistant";
 }
 
-interface FunctionAwareAssistantCompletionMessage {
+export interface FunctionAwareAssistantCompletionMessage {
   content: string | null;
   role: "assistant";
   function_call?: {
@@ -244,7 +244,7 @@ interface FunctionAwareAssistantCompletionMessage {
   };
 }
 
-interface FunctionCompletionMessage {
+export interface FunctionCompletionMessage {
   content: string;
   role: "function";
   name: string;
