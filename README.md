@@ -119,6 +119,21 @@ const imageVariation = await openAI.createImageVariation({
 console.log(imageVariation);
 ```
 
+### Audio Transcription
+
+```ts
+import { OpenAI } from "https://deno.land/x/openai/mod.ts";
+
+const openAI = new OpenAI(Deno.env.get("YOUR_API_KEY")!);
+
+const transcription = await openAI.createTranscription({
+  model: "whisper-1",
+  file: '/path/to/your/audio/file.mp3',
+});
+
+console.log(transcription);
+```
+
 ## Maintainers
 
 - Dean Srebnik ([@load1n9](https://github.com/load1n9))
