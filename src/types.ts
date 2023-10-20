@@ -719,7 +719,11 @@ export interface ChatCompletion {
 export interface ChatCompletionStreamDelta {
   name?: string;
   role?: "system" | "assistant" | "user";
-  content?: string;
+  content?: string | null;
+  function_call?: {
+    name?: string;
+    arguments: string;
+  }
 }
 
 export interface ChatCompletionStream {
