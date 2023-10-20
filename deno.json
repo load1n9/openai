@@ -1,6 +1,6 @@
 {
   "imports": {
-    "std/": "https://deno.land/std@0.189.0/"
+    "std/": "https://deno.land/std@0.204.0/"
   },
   "tasks": {},
   "lock": false
