@@ -733,7 +733,7 @@ export interface ChatCompletionStream {
   choices: {
     index: number;
     delta: ChatCompletionStreamDelta;
-    finish_reason: string;
+    finish_reason: string | null;
   }[];
 }
 
