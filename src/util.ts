@@ -1,40 +1,46 @@
-import { TextDelimiterStream } from "https://deno.land/std@0.189.0/streams/mod.ts";
+import { TextDelimiterStream } from "https://deno.land/std@0.189.0/streams/text_delimiter_stream.ts";
+import { ModelError, RequiredError } from "./types.ts";
 
-export function throwError(
-  data: { error?: { type: string; message: string; code: string } },
-) {
-  if (data.error) {
-    let errorMessage = `${data.error.type}`;
-    if (data.error.message) {
-      errorMessage += ": " + data.error.message;
-    }
-    if (data.error.code) {
-      errorMessage += ` (${data.error.code})`;
-    }
-    // console.log(data.error);
-    throw new Error(errorMessage);
+export function throwErrorIfNeeded(response: unknown) {
+  // deno-lint-ignore ban-types
+  if ("error" in (response as object)) {
+    const {
+      error: { type, message },
+    } = response as { error: ModelError };
+
+    throw new RequiredError(type, message);
   }
 }
 
-// deno-lint-ignore no-explicit-any
-export async function decodeStream(
-  res: Response,
-  callback: (data: any) => void,
+export async function decodeStream<T>(
+  { body: stream }: Response,
+  callback: (data: T) => void
 ) {
-  const chunks = res.body!
+  if (stream === null || stream.locked) {
+    throw new Error(`The stream is ${stream === null ? "null" : "locked"}.`);
+  }
+
+  const chunks = stream
     .pipeThrough(new TextDecoderStream())
-    .pipeThrough(new TextDelimiterStream("\n\n"));
+    .pipeThrough(new TextDelimiterStream("\n\n"))
+    .getReader();
 
-  for await (const chunk of chunks) {
-    let data;
-    try {
-      data = JSON.parse(chunk);
-    } catch {
-      // no-op (just checking if error message)
+  try {
+    for (;;) {
+      const { done, value: chunk } = await chunks.read();
+
+      if (done || chunk === "data: [DONE]") {
+        break;
+      }
+
+      const argument = JSON.parse(
+        chunk.startsWith("data: ") ? chunk.slice(6) : chunk
+      );
+
+      throwErrorIfNeeded(argument);
+      callback(argument);
     }
-    if (data) throwError(data);
-
-    if (chunk === "data: [DONE]") break;
-    callback(JSON.parse(chunk.slice(6)));
+  } finally {
+    chunks.releaseLock();
   }
 }

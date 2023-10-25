@@ -1,5 +1,5 @@
 import { basename } from "https://deno.land/std@0.189.0/path/mod.ts";
-import { decodeStream, throwError } from "./util.ts";
+import { decodeStream, throwErrorIfNeeded } from "./util.ts";
 import type {
   ChatCompletion,
   ChatCompletionOptions,
@@ -70,7 +70,7 @@ export class OpenAI {
     );
     const data = await response.json();
 
-    throwError(data);
+    throwErrorIfNeeded(data);
 
     return data;
   }

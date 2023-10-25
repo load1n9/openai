@@ -869,3 +869,22 @@ export interface Moderation {
     flagged: boolean;
   }[];
 }
+
+export interface ErrorResponse {
+  error: Error;
+}
+
+export interface ModelError {
+  type: string;
+  message: string;
+  param: string | null;
+  code: string | null;
+}
+
+export class RequiredError extends Error {
+  public name = "RequiredError";
+
+  constructor(public readonly field: string, message?: string) {
+    super(message);
+  }
+}
