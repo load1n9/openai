@@ -1,4 +1,4 @@
-import { TextDelimiterStream } from "https://deno.land/std@0.189.0/streams/mod.ts";
+import { TextDelimiterStream } from "./deps.ts";
 
 export function throwError(
   data: { error?: { type: string; message: string; code: string } },
