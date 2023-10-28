@@ -716,18 +716,24 @@ export interface ChatCompletion {
   };
 }
 
+export interface ChatCompletionStreamDelta {
+  name?: string;
+  role?: "system" | "assistant" | "user";
+  content?: string | null;
+  function_call?: {
+    name?: string;
+    arguments: string;
+  }
+}
+
 export interface ChatCompletionStream {
   id: string;
   object: "chat.completion.chunk";
   created: number;
   choices: {
     index: number;
-    delta: {
-      name?: string;
-      role?: "system" | "assistant" | "user";
-      content?: string;
-    };
-    finish_reason: string;
+    delta: ChatCompletionStreamDelta;
+    finish_reason: string | null;
   }[];
 }
 
