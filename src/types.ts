@@ -723,7 +723,7 @@ export interface ChatCompletionStreamDelta {
   function_call?: {
     name?: string;
     arguments: string;
-  }
+  };
 }
 
 export interface ChatCompletionStream {

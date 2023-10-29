@@ -128,7 +128,7 @@ const openAI = new OpenAI(Deno.env.get("YOUR_API_KEY")!);
 
 const transcription = await openAI.createTranscription({
   model: "whisper-1",
-  file: '/path/to/your/audio/file.mp3',
+  file: "/path/to/your/audio/file.mp3",
 });
 
 console.log(transcription);
