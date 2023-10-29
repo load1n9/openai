@@ -186,7 +186,7 @@ export class OpenAI {
 
     // null coalesce content to empty string as discussed in PR #17
     resp?.choices?.forEach(
-      (choice) => (choice.message.content = choice.message.content ?? "")
+      (choice) => (choice.message.content = choice.message.content ?? ""),
     );
     return resp;
   }
@@ -222,7 +222,7 @@ export class OpenAI {
           logit_bias: options.logitBias,
           user: options.user,
           functions: options.functions,
-          function_call: options.function_call
+          function_call: options.function_call,
         }),
       },
     );
@@ -285,11 +285,11 @@ export class OpenAI {
       formData.append("image", options.image as unknown as Blob);
     }
 
-    if (options.n) { formData.append("n", options.n); }
-    if (options.mask) { formData.append("mask", options.mask); }
-    if (options.prompt) { formData.append("prompt", options.prompt); }
-    if (options.size) { formData.append("size", options.size); }
-    if (options.user) { formData.append("user", options.user); }
+    if (options.n) formData.append("n", options.n);
+    if (options.mask) formData.append("mask", options.mask);
+    if (options.prompt) formData.append("prompt", options.prompt);
+    if (options.size) formData.append("size", options.size);
+    if (options.user) formData.append("user", options.user);
     if (options.responseFormat) {
       formData.append("response_format", options.responseFormat);
     }
@@ -324,9 +324,9 @@ export class OpenAI {
       formData.append("image", options.image as unknown as Blob);
     }
 
-    if (options.n) { formData.append("n", options.n); }
-    if (options.size) { formData.append("size", options.size); }
-    if (options.user) { formData.append("user", options.user); }
+    if (options.n) formData.append("n", options.n);
+    if (options.size) formData.append("size", options.size);
+    if (options.user) formData.append("user", options.user);
     if (options.responseFormat) {
       formData.append("response_format", options.responseFormat);
     }
